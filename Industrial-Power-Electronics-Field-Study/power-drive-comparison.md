@@ -1,61 +1,61 @@
-# 大功率焊接电源与低压直流电机驱动的对比分析
+# Comparative Analysis of High-Power Welding Power Supply and Low-Voltage DC Motor Drive
 
-## 背景
+## Background
 
-在项目A（STM32电机PID闭环控制）中，我使用TB6612FNG模块驱动12V直流减速电机。首次上电时因VM引脚耐压不足（10V）和反向感应电动势导致模块烧毁，后续通过更换耐压≥15V模块、并联100μF电解电容吸收反向电压尖峰、串联1kΩ限流电阻保护GPIO等措施才解决了问题。
+In Project A (STM32 Motor PID Closed-Loop Control), I used the TB6612FNG module to drive a 12V DC geared motor. During the first power-up, the module burned due to insufficient VM pin voltage rating (10V) and reverse electromotive force (back-EMF) spikes. The problem was resolved by replacing the module with a ≥15V-rated version, adding a 100μF electrolytic capacitor in parallel to absorb back-EMF voltage spikes, and inserting 1kΩ current-limiting resistors in series with all control signal lines to protect the GPIO pins.
 
-在天一焊接实习期间，我调研了松下YD-350GP5和YD-500GP5数字IGBT逆变焊机。通过对比分析工业级大功率驱动系统和我自己搭建的低压直流驱动系统，我在驱动拓扑、功率器件选型、保护策略和可靠性设计方面有了全新的认知。
+During my internship at Tianyi Welding, I investigated the Panasonic YD-350GP5 and YD-500GP5 digital IGBT inverter welding machines. By conducting a comparative analysis between an industrial-grade high-power drive system and the low-voltage DC drive system I built myself, I gained new insights into drive topology, power device selection, protection strategies, and reliability engineering.
 
-## 一、功率量级对比
+## 1. Power-Level Comparison
 
-松下YD-350GP5焊机的额定输出为350A/31.5V，额定输入容量17.6kVA/13.5kW。我在项目中驱动的直流减速电机额定电压12V，正常工作电流约0.5A，功率约6W。工业焊机的额定功率是我桌面驱动系统的约2250倍。
+The Panasonic YD-350GP5 delivers a rated output of 350A at 31.5V, with a rated input capacity of 17.6kVA / 13.5kW. In comparison, the DC geared motor in my project operates at 12V with a normal operating current of approximately 0.5A, yielding a power of roughly 6W. The industrial welding machine's rated power is approximately 2,250 times that of my desktop drive system.
 
-| 参数 | 松下YD-350GP5 | TB6612 + JGB37-520 | 比值 |
+| Parameter | Panasonic YD-350GP5 | TB6612 + JGB37-520 | Ratio |
 |:---|:---|:---|:---|
-| 输入电压 | 三相AC 380V | DC 12V | 31.7倍 |
-| 输出电压 | DC 31.5V（额定） | DC 12V | 2.6倍 |
-| 输出电流 | 350A（额定） | ~0.5A | 700倍 |
-| 额定功率 | 13.5kW | ~6W | 2250倍 |
-| 功率器件 | IGBT（650V耐压） | MOSFET（集成，~30V耐压） | 21.7倍耐压裕量差异 |
+| Input Voltage | 3-phase AC 380V | DC 12V | 31.7× |
+| Output Voltage | DC 31.5V (rated) | DC 12V | 2.6× |
+| Output Current | 350A (rated) | ~0.5A | 700× |
+| Rated Power | 13.5kW | ~6W | 2,250× |
+| Power Device | IGBT (650V rated) | Integrated MOSFET (~30V rated) | 21.7× voltage margin difference |
 
-功率量级的差异不只是数字上的放大，而是驱动拓扑、器件选型、散热设计和保护策略的全面升级。低压直流电机驱动可以用一个集成的H桥芯片解决，而13.5kW的焊接电源需要三相整流、全桥IGBT逆变、中频变压器隔离、次级快恢复二极管整流的多级功率变换架构。
+The difference in power levels is not merely a numerical amplification; it represents a comprehensive upgrade in drive topology, device selection, thermal management, and protection strategy. A low-voltage DC motor drive can be implemented using a single integrated H-bridge chip, whereas a 13.5kW welding power supply requires a multi-stage power conversion architecture comprising three-phase rectification, full-bridge IGBT inversion, medium-frequency transformer isolation, and secondary fast-recovery diode rectification.
 
-## 二、功率器件选型对比
+## 2. Power Device Selection Comparison
 
-松下YD-350GP5采用IGBT作为核心功率开关器件，型号2MBI100TA065，耐压650V。三相380V交流电经整流滤波后的直流母线电压峰值约为537V。650V耐压对于537V母线电压的耐压余量约为21%。
+The Panasonic YD-350GP5 employs IGBTs as the core power switching devices, specifically the 2MBI100TA065 with a voltage rating of 650V. After rectification and filtering of the three-phase 380V AC input, the DC bus voltage peaks at approximately 537V. The 650V rated IGBT provides a voltage safety margin of approximately 21% relative to the 537V bus voltage.
 
-我在TB6612模块中使用的集成MOSFET（芯片内置）在10V额定耐压下承受12.6V满电锂电池电压，超过了器件允许的绝对最大额定值，导致内部H桥MOSFET被击穿烧毁。
+In my TB6612 module, the integrated MOSFET (built into the chip) with a rated withstand voltage of 10V was subjected to a fully charged LiPo battery voltage of 12.6V, exceeding the absolute maximum rating of the device. This overvoltage caused the internal H-bridge MOSFET to break down and burn out.
 
-工业焊机在功率器件选型上留有明确的耐压余量（约21%），而低成本低压模块为了压缩成本牺牲了余量设计，甚至连1V的过压都无法承受。这让我意识到，数据手册中的“绝对最大额定值”是设计的底线，而不是可以依赖的保证值。在实际工程中，必须在最大额定值之外再留出充足的设计余量。
+The industrial welding machine maintains a clear voltage safety margin in power device selection (approximately 21%), whereas the low-cost, low-voltage module sacrificed margin design to reduce cost and could not tolerate even 1V of overvoltage. This taught me that the "absolute maximum rating" specified in datasheets is a design boundary, not a value to be relied upon for normal operation. In practical engineering, adequate design margin must always be maintained beyond the maximum rated values.
 
-## 三、保护策略对比
+## 3. Protection Strategy Comparison
 
-我在项目A中只加了两个保护元件：100μF电解电容（吸收反向感应电动势尖峰）和6个1kΩ限流电阻（限制TB6612损坏后的反灌电流）。这是在功能层面的基本保护，是在模块烧毁后的补救措施。
+In Project A, I added only two protection components: a 100μF electrolytic capacitor (to absorb back-EMF voltage spikes) and six 1kΩ current-limiting resistors (to limit the fault current if the TB6612 failed). This was basic functional-level protection — a remedial measure implemented only after the module had already burned out.
 
-松下YD-350GP5焊机内置了多层保护体系：
+The Panasonic YD-350GP5 incorporates a multi-layered protection system.
 
-**输入侧保护**：外部配电箱配置40A熔断器和50A断路器（350型）作为第一级过流和短路保护。机内送丝电机回路配置8A保险丝、加热器回路配置8A保险丝、电压检测回路配置3A保险丝等多路独立保护，实现了各功能回路的隔离防护。
+**Input-side protection**: An external distribution box is configured with a 40A fuse and a 50A circuit breaker (for the 350 model) as the first level of overcurrent and short-circuit protection. Inside the machine, independent fuses are provided for the wire feeder motor circuit (8A), the heater circuit (8A), and the voltage detection circuit (3A), achieving isolated fault protection for each functional loop.
 
-**电压异常保护**：焊机具备输入过压、欠压、缺相检测功能。当输入电压超出允许范围（304V~437V）或发生缺相时，分别触发Err-004（过压）或Err-005（欠压/缺相）报警并自动停机，防止功率器件因异常供电而损坏。
+**Voltage anomaly protection**: The welding machine features input overvoltage, undervoltage, and phase-loss detection. When the input voltage exceeds the permissible range (304V–437V) or a phase loss occurs, Err-004 (overvoltage) or Err-005 (undervoltage/phase loss) alarms are triggered, and the machine shuts down automatically to prevent damage to power devices from abnormal power supply conditions.
 
-**过温保护**：前面板设有温度异常指示灯，通过热继电器实时监测IGBT散热器和电抗器的温度。当温度超过安全阈值时，指示灯闪烁并自动切断焊接输出。液冷机型还额外配备了冷却液循环监测，待机7分钟后自动进入节电模式。
+**Overtemperature protection**: A temperature anomaly indicator is located on the front panel. Thermal relays continuously monitor the temperatures of the IGBT heat sink and the reactor. When the temperature exceeds the safety threshold, the indicator flashes and the welding output is automatically cut off. Liquid-cooled models are additionally equipped with coolant circulation monitoring and automatically enter a power-saving mode after 7 minutes of standby.
 
-**输出异常保护**：焊机在上电自检时检测输出侧的电压和电流，若发现异常则触发Err-008报警并拒绝启动。送丝回路设有独立过流保护（Err-028），防止送丝电机堵转时烧毁驱动电路。
+**Output anomaly protection**: During power-on self-test, the welding machine checks the output voltage and current. If an anomaly is detected, an Err-008 alarm is triggered and startup is refused. The wire feeder loop has independent overcurrent protection (Err-028) to prevent the wire feed motor drive circuit from burning out if the motor stalls.
 
-相比之下，我的TB6612驱动系统唯一的“保护”是被动等待模块烧毁，然后更换新模块并外加电容和电阻。而工业焊机在输入侧、功率级、热管理、输出侧都设置了主动检测和保护机制，能够在故障发生前预警或在故障发生时及时切断输出，避免连锁损坏。
+In contrast, the only "protection" in my TB6612 drive system was to passively wait for the module to burn out, then replace it and add capacitors and resistors externally. The industrial welding machine, however, implements active detection and protection mechanisms at the input side, the power stage, the thermal management system, and the output side — capable of warning before a fault occurs or promptly cutting off the output when a fault happens to prevent cascading damage.
 
-## 四、散热设计对比
+## 4. Thermal Design Comparison
 
-我在TB6612模块上没有做任何散热处理。虽然模块在正常工作时发热不明显，但在反复启停、堵转或长时间高占空比工作时，芯片结温会持续升高。没有散热设计意味着完全依赖芯片自身的封装热容来承受瞬时温升。
+I did not implement any thermal management for the TB6612 module. Although the module does not generate significant heat during normal operation, the chip junction temperature can rise continuously under repeated start-stop cycles, stall conditions, or prolonged high-duty-cycle operation. The absence of thermal design means relying entirely on the package's own thermal capacitance to absorb instantaneous temperature rises.
 
-松下YD-350GP5采用强制风冷散热，内置2台冷却风扇对IGBT散热器和电抗器进行强制对流冷却。液冷机型还额外配备水泵驱动冷却液循环，将热量通过外部散热器排出。同时，温度传感器实时监控散热器和电抗器温度，过热时自动切断输出并告警，形成“散热+监控+保护”的完整热管理体系。
+The Panasonic YD-350GP5 employs forced-air cooling with two internal cooling fans that provide forced convection cooling for the IGBT heat sink and the reactor. Liquid-cooled models additionally use a pump to drive coolant circulation, dissipating heat through an external radiator. Meanwhile, temperature sensors monitor the heat sink and reactor temperatures in real time; if an over-temperature condition occurs, the output is automatically cut off and an alarm is triggered. This forms a complete thermal management system encompassing cooling, monitoring, and protection.
 
-在工业大功率设备中，散热不是可选的附件，而是系统设计的核心组成部分。没有有效的散热，任何功率器件都会在短时间内因过热而失效。
+In industrial high-power equipment, thermal management is not an optional accessory — it is a core component of system design. Without effective cooling, any power device will fail due to overheating within a short period.
 
-## 五、从对比中获得的工程认知
+## 5. Engineering Insights Gained from This Comparison
 
-在桌面项目中，我的保护方案是“事后补救”：烧了模块才知道要加电容，烧了核心板才知道要加电阻。而在工业焊接电源中，保护是“前置设计”：从输入端的熔断器和断路器，到直流母线的过压欠压检测，到IGBT的温度监控和过热停机，到输出端的异常检测——每一层保护都在故障发生前或发生时立即动作。
+In my desktop project, the protection scheme was reactive: I only knew to add a capacitor after burning the module, and only knew to add resistors after frying the MCU. In the industrial welding power supply, protection is proactive design: from the input-side fuses and circuit breakers, to the DC bus overvoltage and undervoltage detection, to the IGBT temperature monitoring and overtemperature shutdown, to the output-side anomaly detection — every layer of protection acts before or at the moment a fault occurs.
 
-工业设备需要在高温、高湿、粉尘、强电磁干扰、24小时连续运行的恶劣环境下保持稳定。这种环境下，一个未处理的电压尖峰、一次短暂的过热、一个接触不良的接线端子，都可能导致生产线停机，造成远高于设备本身价值的损失。因此工业设备的保护设计遵循“宁可误停，不可损坏”的原则，在每个可能发生故障的环节都设置了冗余保护。
+Industrial equipment must operate stably under harsh conditions — high temperature, high humidity, dust, strong electromagnetic interference, and 24-hour continuous operation. In such an environment, a single unmitigated voltage spike, a brief overheating event, or a loose terminal connection can cause a production line shutdown, resulting in losses far exceeding the cost of the equipment itself. Therefore, the protection design of industrial equipment follows the principle of "better a false stop than a real failure," with redundant protection configured at every point where a fault could occur.
 
-这次实习让我看到了自己桌面项目和真实工业产品之间的差距，也让我对“可靠性工程”有了第一次真实的接触。这对我以后从事嵌入式系统或电力电子相关的研发工作，是一次非常宝贵的启蒙。
+This internship allowed me to see the gap between my desktop project and a real industrial product. It also gave me my first real exposure to reliability engineering. This will be invaluable for my future work in embedded systems or power electronics R&D.
