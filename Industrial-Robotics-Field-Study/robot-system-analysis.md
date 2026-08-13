@@ -60,7 +60,7 @@ The robot also supports multiple mounting configurations: floor-mounted, ceiling
 
 In my own project, the robot set on the ceiling
 
-*[Place photo of you operating the robot arm with the teach pendant here.]*
+<img src="01.png"/>
 
 ## 2. Control Architecture: R-30iB Plus Mate Controller
 
@@ -96,13 +96,26 @@ Harmonic reducers use a flexible spline to achieve high reduction ratios in a ve
 
 In my project, the DC motors drove the wheels through a simple 1:28 planetary gearbox. The motor's position was measured by a 13 PPR Hall encoder with 4× decoding — a resolution of 1456 pulses per revolution at the output shaft. In contrast, the absolute encoders and precision reducers in the FANUC robot achieve a position resolution orders of magnitude higher. The combination of absolute encoders, high-stiffness reducers, and a real-time control loop is what makes ±0.02 mm repeatability achievable.
 
-*[Place photo of the R-30iB Plus Mate controller cabinet here. Show the front panel and any visible components.]*
+<img src="02.png"/>
 
 ### 2.4 Safety and Power Management
 
 The power and safety unit includes the power supply, emergency stop circuit, and regenerative resistors. The power supply converts three-phase AC to the various DC levels required by the control system. The independent emergency stop safety loop controls the servo contactors and pre-charge circuit, supporting three-level emergency stop control from the cabinet panel, the teach pendant, and external terminals.
 
 The regenerative resistor is an especially elegant solution that I want to highlight. When the robot decelerates rapidly, the kinetic energy of the moving arm must go somewhere. In my project, this energy was simply dissipated as heat in the motor windings — I could feel the motors warming up after repeated braking. In the FANUC system, the regenerative resistor absorbs this energy from the servo amplifier's DC bus during deceleration. This protects the amplifier from overvoltage conditions and improves overall energy efficiency. It is a direct industrial-scale analog to the back-EMF protection problem I encountered with my TB6612 driver — except instead of just adding a capacitor to absorb the spike, the industrial system actively manages the regenerated energy.
+
+### 2.5 Teach Pendant: The Human-Machine Interface
+
+The teach pendant that accompanies the R-30iB Plus Mate controller is the iPendant Touch — a handheld device that combines a high-resolution color touchscreen with physical buttons in a dual-operation mode. It runs FANUC's iHMI graphical interface, which provides built-in setup wizards, fault diagnostics, and maintenance reminders.
+
+What struck me most about the teach pendant is not its screen or its buttons, but the safety design built into it. It features a three-position safety switch on the back of the grip. In manual mode, the operator must squeeze and hold this switch at the middle position to enable the robot's motion. If the operator releases the switch entirely — or squeezes it too hard in panic — the robot immediately comes to a safety stop. This is a physical safety mechanism that operates independent of software, designed for a world where an unexpected robot motion can result in serious injury.
+
+The teach pendant also supports multiple coordinate systems: joint, world, tool, and user. Each coordinate system provides a different way of commanding the robot's motion, suited to different tasks. Joint mode moves individual axes one at a time — useful for manual recovery and fine adjustment. World mode moves the tool in Cartesian directions aligned with the factory floor. Tool mode moves the tool along its own axis. User mode moves along a custom-defined work coordinate system, which is essential for welding fixtures mounted at arbitrary orientations.
+
+This multi-coordinate capability is something my differential-drive robot never needed. My robot's motion space was two-dimensional and self-evident: forward, backward, left, right. The FANUC robot operates in a six-dimensional configuration space that is not at all intuitive to command directly. The multi-coordinate system is the answer to a fundamental human-robot interaction problem: how do you let a human operator intuitively command a machine whose internal state is far more complex than the task they are trying to accomplish?
+
+<img src="03.png">
+
 
 ## 3. Weld Seam Tracking: Perception Systems in an Industrial Environment
 
