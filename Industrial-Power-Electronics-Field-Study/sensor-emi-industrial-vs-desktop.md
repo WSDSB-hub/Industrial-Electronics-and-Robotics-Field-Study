@@ -34,7 +34,10 @@ The Keyence IL-100 series or domestic CRNT series laser displacement sensor is t
 
 ### 1.5 Industrial Vision Positioning Sensor (For Vision-Guided Welding and Seam Identification)
 
-Hikrobot industrial area-scan cameras or Keyence CV series vision systems transmit primary positioning data via Gigabit Ethernet / GigE Vision. Trigger and status signals are NPN/PNP digital switching signals and require optocoupler isolation. Some simplified models support 4–20mA output for seam offset values. The camera cable is routed separately through a metal flexible conduit, arranged in a different layer from the welding power cables, with a horizontal spacing of ≥30cm. The camera body is fitted with an anti-arc and anti-spatter metal shield. Cable connectors are sealed against water and spatter, and ferrite beads are added to both ends of the network cable for filtering.
+Hikrobot industrial area-scan cameras or Keyence CV series vision systems transmit primary positioning data via Gigabit Ethernet / GigE Vision. Trigger and status signals are NPN/PNP digital switching signals and require optocoupler isolation. Some simplified models support 4–20mA output for seam offset values. The camera cable is routed separately through a metal flexible conduit, arranged in a different layer from the welding power cables, with a horizontal spacing of ≥30cm. The camera body is fitted with an anti-arc and anti-spatt<er metal shield. Cable connectors are sealed against water and spatter, and ferrite beads are added to both ends of the network cable for filtering.
+
+<img src="3.png"/>
+<img src="6.png"/>
 
 ## 2. 4–20mA Current Loop vs. 0–10V Voltage Signal: The Core Design Principle for Industrial Anti-Interference
 
@@ -68,6 +71,8 @@ The encoder signal transmission method I used in Project A was as follows: the e
 
 In contrast, the sensor signal chain design in an industrial environment follows fundamentally different principles: using current loops instead of voltage signals for long distances; using shielded twisted-pair cables with strictly enforced routing clearances in high-noise environments; adding optocoupler isolation on critical signal paths; and powering sensors from isolated power supplies. These design measures are not optional enhancements — they are the foundation that enables industrial equipment to operate stably under conditions of strong interference, long distances, and high reliability requirements.
 
+<img src="5.png"/>
+
 ## 3. Signal and Power Cable Routing Standards
 
 The engineering construction standards at Tianyi Welding specify clear requirements for the routing of signal and power cables. These standards are a direct embodiment of electromagnetic compatibility design in engineering practice.
@@ -85,6 +90,8 @@ Where crossing is unavoidable, cables must intersect at 90° to minimize the ele
 All analog signal cables must use shielded twisted-pair cable. The shield must be grounded at a single point (grounded at the control cabinet side, floating at the sensor side) to prevent a ground potential difference between the two locations from creating a ground loop. On-site cabling must be run through metal flexible conduit or galvanized steel pipe. Co-routing with power cables in the same conduit is prohibited. The metal conduit must be reliably grounded along its entire length to form a continuous shielding cavity. The cables for laser and vision sensors must be run through metal conduit or metal drag chains along their entire length; exposed cabling is prohibited.
 
 These standards are conceptually similar to my approach of "keeping DuPont wires as far from the motor as possible" when dealing with encoder signal interference. However, the industrial on-site construction standards are systematic, quantitative, and reusable, whereas my solution was merely a temporary, experience-based workaround. This is the difference between "engineering" and "debugging."
+
+<img src="4.png"/>
 
 ## 4. Troubleshooting and Resolution of Sensor False Triggering Caused by Arc Welding Interference
 
