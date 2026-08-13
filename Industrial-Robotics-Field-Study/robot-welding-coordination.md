@@ -48,9 +48,18 @@ The shielding gas solenoid valve closes 0.5 to 2 seconds after arc extinction �
 
 After the dwell period expires, the robot executes its departure motion — typically a rapid repositioning move using joint interpolation — to clear the workpiece and prepare for the next cycle.
 
-*[Place photo of the welding robot performing an actual weld here. This photo should show the arc, the torch, and the workpiece, demonstrating the real working environment.]*
+<img src="04.png"/>
+<img src="05.png"/>
 
-*[Place photo of you operating the robot teach pendant here. This personal photo demonstrates hands-on interaction with the robot system.]*
+### 1.8 A Practical Challenge: Laser Sensor Access in Confined Spaces
+
+One of the most instructive observations I made on the production floor was not a catastrophic failure but a persistent limitation that the engineers work around on a daily basis. The laser seam tracking sensor is mounted adjacent to the welding torch. Before welding begins, the sensor must be positioned close to the seam to scan and locate it accurately. However, when the workpiece geometry involves confined spaces — narrow channels, deep grooves, or tight corners — the combined physical envelope of the torch and the sensor becomes a liability. The sensor assembly is simply too bulky to enter the space.
+
+The workaround is to scan from a greater standoff distance. This introduces two immediate problems. First, measurement accuracy degrades with distance: the laser triangulation principle relies on a known geometry between the laser emitter, the camera, and the target surface. As the standoff increases, the baseline geometry becomes less favorable, and sub-millimeter precision can no longer be guaranteed. Second, the vision software may fail to reconstruct the actual welding model from the longer-range scan. The point cloud becomes sparse, or the laser stripe broadens to the point where the algorithm can no longer reliably extract the groove edges and seam center.
+
+This is a classic engineering trade-off. The sensor's physical size is driven by its optical design — laser diode, industrial camera, narrowband filter, protective housing — which in turn is driven by the need to survive the harsh welding environment. You cannot simply shrink the sensor without losing robustness against arc light, spatter, and fume. The practical solutions employed on site include using different sensor form factors for different joint geometries, pre-scanning with a removable sensor that is mounted only for the locating pass and then retracted, or combining laser sensing with arc sensing for the confined sections where the laser cannot physically reach.
+
+The deeper lesson for me was this: **perception hardware must be designed not just for the ideal case, but for the worst-case geometry of the workpieces it will encounter.** In my own desktop robot, the camera was mounted on a fixed bracket looking ahead. I never once had to consider whether the camera could physically fit into the space it was supposed to perceive. On an industrial robot, this is a daily engineering consideration — and it directly determines whether a particular sensor solution is viable for a given production task.
 
 ## 2. The Communication Backbone: EtherNet/IP and the TSMYU813 Interface
 
@@ -85,6 +94,16 @@ The first — "the robot moved but the welding machine did not ignite the arc" �
 The second — "the welding machine was still welding but the robot stopped" — is extremely rare under standard interlocking logic. When it does occur, it typically indicates a safety circuit wiring error or a fieldbus communication anomaly that prevented the fault signal from being transmitted in time. The immediate response is to press the emergency stop button to extinguish the arc manually, then investigate the interlock logic and communication link, and supplement with a hardware-level emergency stop linkage mechanism.
 
 The lesson here is profound. My desktop robot had no interlocking at all. If the Bluetooth connection dropped while the robot was moving forward, it would simply continue moving until the last command expired — a minor inconvenience on a desk, but an unacceptable risk in an industrial environment.
+
+### 3.4 A Recurring Source of Trouble: Communication Cable Reliability
+
+Another field issue I noted is the susceptibility of the robot system to intermittent communication failures caused by the physical cabling. The robot and the welding power supply exchange critical control signals through the fieldbus — EtherNet/IP in the newer stations. If the communication cable becomes loose, suffers from repeated flexing during robot motion, or is exposed to the harsh welding environment (heat, spatter, oil mist, and mechanical vibration), data transmission can become intermittent.
+
+The symptom is typically a robot that fails to execute its motion command, or a welding machine that does not respond to the start signal — even though both devices appear to be powered and operational. This is a familiar problem to anyone who has worked with industrial networks: the physical layer is often the weakest link, and its failures are frequently intermittent and difficult to reproduce.
+
+The solutions that the field engineers employ include using high-flex industrial-grade shielded cables, routing cables through protective drag chains, securing connectors with strain relief, and periodically inspecting and replacing cables that show signs of wear. On the diagnostic side, communication modules with status LEDs allow quick identification of link loss, and the robot controller logs communication errors with timestamps, enabling maintenance personnel to correlate failures with specific motion sequences or environmental conditions.
+
+For my own projects, this was a humbling reminder. The Bluetooth link on my desktop robot also suffered from intermittent disconnections, which I initially attributed to software issues. The field experience at Tianyi Welding taught me that physical-layer reliability — cables, connectors, shielding, and grounding — deserves the same rigorous attention as the software logic. In fact, most industrial downtime is caused by physical failures, not code defects. The best communication protocol in the world is useless if the cable carrying it is loose.
 
 ## 4. Wire Feeder and Shielding Gas: The Auxiliary Systems
 
