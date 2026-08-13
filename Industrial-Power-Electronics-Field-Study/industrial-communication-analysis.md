@@ -16,6 +16,10 @@ Its communication interface configuration is as follows. It natively provides tw
 
 The core role of the PLC is to serve as the control brain of the entire welding workstation, coordinating the robot arm's motion trajectory, welding power supply parameter calls, wire feeder control, shielding gas on/off control, sensor signal acquisition, and safety interlock logic.
 
+<img src="7.png"/>
+<img src="8.png"/>
+
+
 ### 1.2 Welding Power Supply Communication Interface
 
 The Panasonic YD-500GP5HGK robot-specific welding machine is the model deployed at the site. Its standard external terminal block supports digital I/O signals (arc start, arc stop, fault output, etc.) as well as 0–15V / 0–12V / 0–10V analog inputs for current and voltage setpoints, with the range switchable via the machine's P23 menu. A robot-specific communication port supports Profinet, DeviceNet, and other industrial bus adapters via an optional dedicated communication board, enabling fully digital process parameter interaction. A D-sub communication connector is used for dedicated control signal interaction with the wire feeder and the robot control cabinet.
@@ -23,6 +27,8 @@ The Panasonic YD-500GP5HGK robot-specific welding machine is the model deployed 
 ### 1.3 Robot Arm Control Cabinet Communication Interface
 
 It comes standard with a Profinet Ethernet port, connecting as a Profinet slave to the PLC bus system to receive motion commands and report real-time position and equipment status. A dedicated robot welding interface allows direct linked communication with the Panasonic welding machine, enabling arc voltage feedback and real-time seam tracking adjustment. Reserved RS485, Ethernet, and other expansion interfaces are available for integration with vision positioning and laser seam tracking sensors.
+
+<img src="9.png"/>
 
 ## 2. Communication Between the Robot Arm and the Welding Power Supply
 
