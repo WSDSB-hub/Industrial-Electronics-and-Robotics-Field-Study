@@ -16,6 +16,8 @@ The emergency stop (E-stop) system is the most critical safety circuit on any in
 
 All E-stop buttons follow strict industrial standards. They use a red mushroom-head, self-locking design — highly visible against any background, easy to strike in an emergency, and requiring a deliberate rotary twist to release, preventing accidental restoration of power. At least three E-stop buttons are deployed at every automation workstation: one on the control cabinet door, one at the robot operator station, and one at the production line entrance. All E-stop buttons are wired with their normally-closed (NC) contacts connected in series into the safety loop — meaning any single button pressed anywhere on the line will break the entire loop and shut down all equipment.
 
+<img src="12.png"/>
+
 ### 1.2 Safety Relay Loop Operation
 
 The E-stop buttons are not connected to the PLC's ordinary digital I/O. Instead, they are wired into the dual-channel safety input of a dedicated safety relay module — model SR14 in the schematic I studied. This safety relay operates on a completely independent 24V DC power supply, physically separate from the standard control power, ensuring that even a failure of the main control system cannot compromise the safety function.
@@ -28,6 +30,8 @@ The output side of the safety relay uses force-guided contacts — a special rel
 
 When any E-stop button is pressed, the safety relay de-energizes immediately. All eight intermediate relays drop out simultaneously. Power and enable signals to all equipment are cut off. The entire workstation — not just a single machine — comes to a complete stop.
 
+<img src="13.png"/>
+
 ### 1.3 Comparison with My Desktop Protection
 
 In my desktop project, the only way to stop the motor in an emergency was to toggle the SW1 switch on the TB6612 module or pull the battery connector. There was no dedicated E-stop button, no safety relay, no independent safety loop. If the STM32 froze or the TB6612 failed in a short-circuit condition, I had no reliable way to cut power without physically touching the wiring — which is exactly the scenario industrial safety design is engineered to prevent. Moreover, my protection was single-point: the 1kΩ resistors could limit backfeed current, but there was no redundancy — if a resistor itself failed open, the protection on that channel was lost.
@@ -35,6 +39,9 @@ In my desktop project, the only way to stop the motor in an emergency was to tog
 ## 2. Control Cabinet Internal Protection Design
 
 The electrical schematic also revealed multiple layers of protection built into the control cabinet itself — protections that go far beyond the component-level measures I applied in my project.
+
+<img src="10.png"/>
+<img src="11.png"/>
 
 ### 2.1 Over-Temperature Protection
 
