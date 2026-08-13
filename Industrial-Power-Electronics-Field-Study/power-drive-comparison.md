@@ -26,7 +26,7 @@ The difference in power levels is not merely a numerical amplification; it repre
 
 ## 2. Power Device Selection Comparison
 
-The Panasonic YD-500GP5 employs IGBTs as the core power switching devices, specifically the 2MBI100TA065 with a voltage rating of 650V. After rectification and filtering of the three-phase 380V AC input, the DC bus voltage peaks at approximately 537V. The 650V rated IGBT provides a voltage safety margin of approximately 21% relative to the 537V bus voltage.
+The Panasonic YD-500GP5 employs IGBTs as the core power switching devices with a voltage rating of 650V. After rectification and filtering of the three-phase 380V AC input, the DC bus voltage peaks at approximately 537V. The 650V rated IGBT provides a voltage safety margin of approximately 21% relative to the 537V bus voltage.
 
 
 In my TB6612 module, the integrated MOSFET (built into the chip) with a rated withstand voltage of 10V was subjected to a fully charged LiPo battery voltage of 12.6V, exceeding the absolute maximum rating of the device. This overvoltage caused the internal H-bridge MOSFET to break down and burn out.
