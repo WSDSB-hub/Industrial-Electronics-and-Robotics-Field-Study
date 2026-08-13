@@ -4,25 +4,41 @@
 
 In Project A (STM32 Motor PID Closed-Loop Control), I used the TB6612FNG module to drive a 12V DC geared motor. During the first power-up, the module burned due to insufficient VM pin voltage rating (10V) and reverse electromotive force (back-EMF) spikes. The problem was resolved by replacing the module with a ≥15V-rated version, adding a 100μF electrolytic capacitor in parallel to absorb back-EMF voltage spikes, and inserting 1kΩ current-limiting resistors in series with all control signal lines to protect the GPIO pins.
 
-During my internship at Tianyi Welding, I investigated the Panasonic YD-350GP5 and YD-500GP5 digital IGBT inverter welding machines. By conducting a comparative analysis between an industrial-grade high-power drive system and the low-voltage DC drive system I built myself, I gained new insights into drive topology, power device selection, protection strategies, and reliability engineering.
+During my internship at Tianyi Welding, I investigated the Panasonic YD-500GP5 digital IGBT inverter welding machines. By conducting a comparative analysis between an industrial-grade high-power drive system and the low-voltage DC drive system I built myself, I gained new insights into drive topology, power device selection, protection strategies, and reliability engineering.
 
 ## 1. Power-Level Comparison
 
-The Panasonic YD-350GP5 delivers a rated output of 350A at 31.5V, with a rated input capacity of 17.6kVA / 13.5kW. In comparison, the DC geared motor in my project operates at 12V with a normal operating current of approximately 0.5A, yielding a power of roughly 6W. The industrial welding machine's rated power is approximately 2,250 times that of my desktop drive system.
+The Panasonic YD-500GP5 delivers a rated output of 500A at 39V (in Pulse OFF mode) with a rated input capacity of 29.9kVA. Calculated at rated output, the power is approximately 19.5kW (500A × 39V). In comparison, the DC geared motor in my project operates at a rated voltage of 12V with a normal operating current of approximately 0.5A, yielding a power of roughly 6W. The industrial welding machine's rated output power is approximately 3,250 times that of my desktop drive system.
 
-| Parameter | Panasonic YD-350GP5 | TB6612 + JGB37-520 | Ratio |
+| Parameter | Panasonic YD-500GP5 | TB6612 + JGB37-520 | Ratio |
 |:---|:---|:---|:---|
-| Input Voltage | 3-phase AC 380V | DC 12V | 31.7× |
-| Output Voltage | DC 31.5V (rated) | DC 12V | 2.6× |
-| Output Current | 350A (rated) | ~0.5A | 700× |
-| Rated Power | 13.5kW | ~6W | 2,250× |
-| Power Device | IGBT (650V rated) | Integrated MOSFET (~30V rated) | 21.7× voltage margin difference |
+| Input Voltage | 3-Phase AC 380V | DC 12V | 31.7× |
+| Rated Output Voltage | DC 39V | DC 12V | 3.25× |
+| Rated Output Current | 500A | ~0.5A | 1,000× |
+| Rated Output Power | ~19.5kW | ~6W | ~3,250× |
+| Open-Circuit Voltage | DC 80V | — | — |
+| Power Device Voltage Rating | IGBT 650V | Integrated MOSFET ~30V | 21.7× |
 
-The difference in power levels is not merely a numerical amplification; it represents a comprehensive upgrade in drive topology, device selection, thermal management, and protection strategy. A low-voltage DC motor drive can be implemented using a single integrated H-bridge chip, whereas a 13.5kW welding power supply requires a multi-stage power conversion architecture comprising three-phase rectification, full-bridge IGBT inversion, medium-frequency transformer isolation, and secondary fast-recovery diode rectification.
+The difference in power levels is not merely a numerical amplification; it represents a comprehensive upgrade in drive topology, power device selection, thermal management, and protection strategy. A low-voltage DC motor drive can be implemented using a single integrated H-bridge chip, whereas a 500A-class welding power supply requires a multi-stage power conversion architecture comprising three-phase rectification, full-bridge IGBT inversion, medium-frequency transformer isolation, and secondary fast-recovery diode rectification.
 
 ## 2. Power Device Selection Comparison
 
-The Panasonic YD-350GP5 employs IGBTs as the core power switching devices, specifically the 2MBI100TA065 with a voltage rating of 650V. After rectification and filtering of the three-phase 380V AC input, the DC bus voltage peaks at approximately 537V. The 650V rated IGBT provides a voltage safety margin of approximately 21% relative to the 537V bus voltage.
+The Panasonic YD-500GP5 employs IGBTs as the core power switching devices, specifically the 2MBI100TA065 with a voltage rating of 650V. After rectification and filtering of the three-phase 380V AC input, the DC bus voltage peaks at approximately 537V. The 650V rated IGBT provides a voltage safety margin of approximately 21% relative to the 537V bus voltage.
+
+In my own project, I had never once considered the question of "how long can this module continuously operate at full power?" The TB6612 datasheet may contain thermal resistance parameters, but I had completely ignored them. I simply assumed it could operate continuously under any load until it overheated and burned out.
+
+The nameplate of the Panasonic YD-500GP5 explicitly states a rated duty cycle of 60% — 6 minutes at full load and 4 minutes idle within every 10-minute period. More importantly, it also specifies the condition for 100% continuous operation: output current ≤387A. This means:
+
+- At the full rated current of 500A, the welding machine cannot operate continuously without limits. It must "rest" for 4 minutes out of every 10 to allow the IGBTs and transformer to cool down.
+- At 387A or below, the welding machine can operate continuously around the clock without de-rating.
+
+This is a design dimension I had never been aware of before: the output capability of a high-power device is not just "what is the maximum it can output," but also "what can it sustainably output." Full-power operation is typically time-limited, while true continuous operation requires de-rating. This distinction between "rated" and "continuous" capability directly determines the usability of equipment in real production environments.
+
+| Parameter | Nameplate Marking | Description |
+|:---|:---|:---|
+| Rated Duty Cycle | 60% | 6 minutes at full load, 4 minutes idle within a 10-minute period |
+| 100% Continuous Duty Condition | Output current ≤387A | Continuous operation without de-rating is possible at or below 387A |
+
 
 In my TB6612 module, the integrated MOSFET (built into the chip) with a rated withstand voltage of 10V was subjected to a fully charged LiPo battery voltage of 12.6V, exceeding the absolute maximum rating of the device. This overvoltage caused the internal H-bridge MOSFET to break down and burn out.
 
